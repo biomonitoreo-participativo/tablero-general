@@ -30,13 +30,24 @@ especies_indicadoras <-
     "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/indicadores/especies-indicadoras.csv"
   )
 
+# Lectura de la capa de áreas de conservación
+areas_conservacion <-
+  st_read(
+    "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/geo/sinac/areas-conservacion-simplificadas_100m.geojson",
+    quiet = TRUE
+  )
+# Transformación del CRS
+areas_conservacion <- 
+  areas_conservacion %>%
+  st_transform(4326)
+
 # Lectura de la capa de corredores_biologicos
 corredores_biologicos <-
   st_read(
     "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/geo/sinac/corredores-biologicos-simplificadas_100m.geojson",
     quiet = TRUE
   )
-# Transformación del CRS del objeto corredores_biologicos
+# Transformación del CRS
 corredores_biologicos <-
   corredores_biologicos %>%
   st_transform(4326)
@@ -84,6 +95,11 @@ registros_presencia <-
     by = c("scientificName" = "especie")
   )
 
+# Adición de columna de área de conservación
+registros_presencia <-
+  registros_presencia %>%
+  st_join(select(areas_conservacion, area_conservacion = nombre_ac))
+
 # Adición de columna de corredor biológico
 registros_presencia <-
   registros_presencia %>%
@@ -106,6 +122,14 @@ opciones_especies_indicadoras <-
 opciones_especies_indicadoras <- sort(opciones_especies_indicadoras)
 opciones_especies_indicadoras <-
   c("Todas", opciones_especies_indicadoras)
+
+# Áreas de conservación
+opciones_areas_conservacion <-
+  unique(registros_presencia$area_conservacion)
+opciones_areas_conservacion <-
+  sort(opciones_areas_conservacion)
+opciones_areas_conservacion <-
+  c("Todas", opciones_areas_conservacion)
 
 # Corredores biológicos
 opciones_corredores_biologicos <-

@@ -14,6 +14,11 @@ dashboardPage(
                 choices = opciones_especies_indicadoras
             ),
             selectInput(
+                inputId = "selector_areas_conservacion",
+                label = "Áreas de conservación",
+                choices = opciones_areas_conservacion
+            ),               
+            selectInput(
                 inputId = "selector_corredores_biologicos",
                 label = "Corredores biológicos",
                 choices = opciones_corredores_biologicos

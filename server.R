@@ -35,6 +35,13 @@ shinyServer(function(input, output, session) {
                 registros_presencia_filtrados %>%
                 filter(scientificName == input$selector_especies_indicadoras)
         }        
+        
+        # Filtrado por corredor biológico
+        if (input$selector_corredores_biologicos != "Todos") {
+            registros_presencia_filtrados <-
+                registros_presencia_filtrados %>%
+                filter(corredor_biologico == input$selector_corredores_biologicos)
+        }               
 
         return(registros_presencia_filtrados)
     })            
@@ -48,6 +55,18 @@ shinyServer(function(input, output, session) {
             addProviderTiles(providers$Stamen.TonerLite, group = "Stamen Toner Lite") %>%
             addProviderTiles(providers$CartoDB.DarkMatter, group = "CartoDB Dark Matter") %>%
             addProviderTiles(providers$Esri.WorldImagery, group = "Imágenes de ESRI") %>%
+            addPolygons(
+                data = corredores_biologicos,
+                group = "Corredores biológicos",
+                color = "green",
+                stroke = TRUE,
+                weight = 1.0,
+                fillOpacity = 0.0,
+                popup = paste0(
+                    "<strong>Corredor biológico: </strong>",
+                    registros_presencia_filtrados$corredor_biologico
+                )
+            ) %>%            
             addCircleMarkers(
                 data = registros_presencia_filtrados,
                 group = "Registros de presencia",
@@ -70,7 +89,10 @@ shinyServer(function(input, output, session) {
                     registros_presencia_filtrados$locality,
                     "<br>",
                     "<strong>Fecha y hora: </strong>",
-                    registros_presencia_filtrados$eventDate
+                    registros_presencia_filtrados$eventDate,
+                    "<br>",
+                    "<strong>Corredor biológico: </strong>",
+                    registros_presencia_filtrados$corredor_biologico                    
                 )
             ) %>%
             addLayersControl(
@@ -80,7 +102,7 @@ shinyServer(function(input, output, session) {
                     "CartoDB Dark Matter",
                     "Imágenes de ESRI"
                 ),
-                overlayGroups = c("Registros de presencia")
+                overlayGroups = c("Corredores biológicos", "Registros de presencia")
             ) %>%
             addScaleBar(position = "bottomleft",
                         options = scaleBarOptions(imperial = FALSE)) %>%

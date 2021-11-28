@@ -13,6 +13,11 @@ dashboardPage(
                 label = "Especies indicadoras",
                 choices = opciones_especies_indicadoras
             ),
+            selectInput(
+                inputId = "selector_corredores_biologicos",
+                label = "Corredores biológicos",
+                choices = opciones_corredores_biologicos
+            ),            
             startExpanded = TRUE,
             menuSubItem(text = "Resumen", tabName = "tab_resumen")
         )

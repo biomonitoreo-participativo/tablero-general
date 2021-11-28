@@ -4,7 +4,7 @@
 
 
 #
-#Paquetes
+# Paquetes
 #
 
 library(dplyr)
@@ -30,6 +30,16 @@ especies_indicadoras <-
     "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/indicadores/especies-indicadoras.csv"
   )
 
+# Lectura de la capa de corredores_biologicos
+corredores_biologicos <-
+  st_read(
+    "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/geo/sinac/corredores-biologicos-simplificadas_100m.geojson",
+    quiet = TRUE
+  )
+# Transformación del CRS del objeto corredores_biologicos
+corredores_biologicos <-
+  corredores_biologicos %>%
+  st_transform(4326)
 
 # Registros de presencia de especies de la app de biomonitoreo
 registros_presencia_app <-
@@ -40,6 +50,8 @@ registros_presencia_app <-
       "Y_POSSIBLE_NAMES=decimalLatitude"
     )
   )
+# Asignación de CRS
+st_crs(registros_presencia_app) = 4326
 # Exclusión de especies no indicadoras
 registros_presencia_app <-
   registros_presencia_app %>%
@@ -63,6 +75,7 @@ registros_presencia <-
 registros_presencia <-
   registros_presencia %>%
   filter(!(decimalLongitude == 0 | decimalLatitude == 0))
+
 # Adición de columna de grupos nomenclaturales
 registros_presencia <-
   registros_presencia %>%
@@ -70,6 +83,11 @@ registros_presencia <-
     select(especies_indicadoras, especie, grupos_nomenclaturales),
     by = c("scientificName" = "especie")
   )
+
+# Adición de columna de corredor biológico
+registros_presencia <-
+  registros_presencia %>%
+  st_join(select(corredores_biologicos, corredor_biologico = nombre_cb))
 
 
 # Listas de selección
@@ -88,3 +106,11 @@ opciones_especies_indicadoras <-
 opciones_especies_indicadoras <- sort(opciones_especies_indicadoras)
 opciones_especies_indicadoras <-
   c("Todas", opciones_especies_indicadoras)
+
+# Corredores biológicos
+opciones_corredores_biologicos <-
+  unique(registros_presencia$corredor_biologico)
+opciones_corredores_biologicos <-
+  sort(opciones_corredores_biologicos)
+opciones_corredores_biologicos <-
+  c("Todos", opciones_corredores_biologicos)

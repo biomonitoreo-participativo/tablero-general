@@ -24,6 +24,11 @@ dashboardPage(
                 label = "Corredor biológico",
                 choices = opciones_corredores_biologicos
             ),
+            selectInput(
+                inputId = "selector_fuentes_datos",
+                label = "Fuente de datos",
+                choices = opciones_fuentes_datos
+            ),            
             startExpanded = TRUE,
             menuSubItem(text = "Resumen", tabName = "tab_resumen")
         )

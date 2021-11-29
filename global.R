@@ -81,12 +81,69 @@ registros_presencia_app <-
   registros_presencia_app %>%
   mutate(fuente = "App de biomonitoreo")
 
+
+# Registros de presencia de especies de las cámaras trampa
+# Detecciones de especies en las cámaras
+detecciones <-
+  read.csv(
+    "https://raw.githubusercontent.com/biomonitoreo-participativo/biomonitoreo-participativo-datos/master/crtms/detection.csv"
+  )
+# Estaciones en dónde están ubicadas las cámaras
+estaciones <-
+  read.csv(
+    "https://raw.githubusercontent.com/biomonitoreo-participativo/biomonitoreo-participativo-datos/master/crtms/station.csv"
+  )
+# Registros de presencia
+registros_presencia_camaras <- inner_join(detecciones, estaciones)
+# Eliminar registros sin coordenadas
+registros_presencia_camaras <-
+  registros_presencia_camaras %>% drop_na(longitude, latitude)
+# Exclusión de especies no indicadoras
+registros_presencia_camaras <-
+  registros_presencia_camaras %>%
+  subset(species %in% especies_indicadoras$especie)
+# Conversión de la columna de fecha y creación de la columna de hora
+registros_presencia_camaras <-
+  registros_presencia_camaras %>%
+  mutate(dateTimeCaptured = as_datetime(dateTimeCaptured, format = "%Y:%m:%d %H:%M:%OS")) %>%
+  mutate(hourCaptured = hour(dateTimeCaptured))
+# Adición de columna de fuente de datos
+registros_presencia_camaras <-
+  registros_presencia_camaras %>%
+  mutate(fuente = "Cámaras trampa")
+# Conversión a objeto sf
+registros_presencia_camaras <-
+  registros_presencia_camaras %>% st_as_sf(coords = c("longitude", "latitude"), crs = 4326, remove = FALSE)
+
+
 #
 # Integración de los registros de presencia de especies
 #
 
+# Integración de registros de la app de biomonitoreo
 registros_presencia <-
-  registros_presencia_app
+  rbind(
+    select(
+      registros_presencia_app,
+      scientificName,
+      locality,
+      eventDate,
+      fuente,
+      decimalLongitude,
+      decimalLatitude,
+      geometry
+    ),
+    select(
+      registros_presencia_camaras,
+      scientificName = species,
+      locality = deploymentLocationID,
+      eventDate = dateTimeCaptured,
+      fuente,
+      decimalLongitude = longitude,
+      decimalLatitude = latitude,
+      geometry
+    )
+  )
 
 # Exclusión de registros con coordenadas en 0 (ESTO DEBERÍA HACERSE FILTRANDO LOS PUNTOS QUE NO ESTÁN DENTRO DE COSTA RICA)
 registros_presencia <-
@@ -165,3 +222,11 @@ opciones_corredores_biologicos <-
   sort(opciones_corredores_biologicos)
 opciones_corredores_biologicos <-
   c("Todos", opciones_corredores_biologicos)
+
+# Fuente de datos
+opciones_fuentes_datos <-
+  unique(registros_presencia$fuente)
+opciones_fuentes_datos <-
+  sort(opciones_fuentes_datos)
+opciones_fuentes_datos <-
+  c("Todas", opciones_fuentes_datos)

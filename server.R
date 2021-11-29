@@ -72,6 +72,13 @@ shinyServer(function(input, output, session) {
                 filter(corredor_biologico == input$selector_corredores_biologicos)
         }
         
+        # Filtrado por fuente de datos
+        if (input$selector_fuentes_datos != "Todas") {
+            registros_presencia_filtrados <-
+                registros_presencia_filtrados %>%
+                filter(fuente_datos == input$selector_fuentes_datos)
+        }        
+        
         return(registros_presencia_filtrados)
     })
     
@@ -83,7 +90,8 @@ shinyServer(function(input, output, session) {
         # Filtrado por grupo nomenclatural
         if (input$selector_grupos_nomenclaturales != "Todos" |
             input$selector_especies_indicadoras != "Todas" |
-            input$selector_corredores_biologicos != "Todos") {
+            input$selector_corredores_biologicos != "Todos" |
+            input$selector_fuentes_datos != "Todas") {
             # Cantidad de especies en corredores biológicos
             corredores_biologicos_especies <-
                 corredores_biologicos %>%

@@ -4,23 +4,24 @@ dashboardPage(
         menuItem(
             text = "Filtros de datos",
             selectInput(
+                inputId = "selector_areas_conservacion",
+                label = "Área de conservación",
+                choices = opciones_areas_conservacion,
+                selected = "ACLAP"
+            ),
+            selectInput(
                 inputId = "selector_grupos_nomenclaturales",
-                label = "Grupos de especies",
+                label = "Grupo de especies",
                 choices = opciones_grupos_nomenclaturales
             ),
             selectInput(
                 inputId = "selector_especies_indicadoras",
-                label = "Especies indicadoras",
+                label = "Especie indicadora",
                 choices = opciones_especies_indicadoras
             ),
             selectInput(
-                inputId = "selector_areas_conservacion",
-                label = "Áreas de conservación",
-                choices = opciones_areas_conservacion
-            ),
-            selectInput(
                 inputId = "selector_corredores_biologicos",
-                label = "Corredores biológicos",
+                label = "Corredor biológico",
                 choices = opciones_corredores_biologicos
             ),
             startExpanded = TRUE,
@@ -33,19 +34,26 @@ dashboardPage(
                     column(
                         width = 6,
                         box(
-                            title = "Registros de presencia de especies",
-                            leafletOutput(outputId = "mapa_registros_presencia_resumen", height = 500),
+                            title = "Registros de presencia de especies indicadoras",
+                            leafletOutput(outputId = "mapa_registros_presencia_resumen", height = 475),
                             width = NULL
                         )
                     ),
                     column(
                         width = 6,
                         box(
-                            title = "Registros de presencia de especies",
-                            DTOutput(outputId = "tabla_registros_presencia_resumen", height = 250),
+                            title = "Registros de presencia de especies indicadoras",
+                            DTOutput(outputId = "tabla_registros_presencia_resumen", height = 475),
                             width = NULL
                         )
                     )
-                ))
+                ), fluidRow(column(
+                    width = 12,
+                    box(
+                        title = "Cantidad de especies indicadoras en corredores biológicos",
+                        plotlyOutput(outputId = "grafico_corredores_biologicos_especies_resumen", height = 200),
+                        width = NULL
+                    )
+                )))
     ))
 )

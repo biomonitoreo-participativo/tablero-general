@@ -1,4 +1,19 @@
 shinyServer(function(input, output, session) {
+    # filtrarAreasConservacion <- reactive({
+    #     areas_conservacion_filtradas <-
+    #         areas_conservacion
+    #     
+    #     # Filtrado por área de conservación
+    #     if (input$selector_areas_conservacion != "Todas") {
+    #         areas_conservacion_filtradas <-
+    #             areas_conservacion_filtradas %>%
+    #             filter(siglas_ac == input$selector_areas_conservacion)            
+    #     }        
+    #     
+    #     return (areas_conservacion_filtradas)
+    # })
+    
+    
     filtrarRegistrosPresencia <- reactive({
         registros_presencia_filtrados <-
             registros_presencia
@@ -44,6 +59,10 @@ shinyServer(function(input, output, session) {
             registros_presencia_filtrados <-
                 registros_presencia_filtrados %>%
                 filter(area_conservacion == input$selector_areas_conservacion)
+            
+            areas_conservacion <-
+                areas_conservacion %>%
+                filter(siglas_ac == input$selector_areas_conservacion)            
         }
         
         # Filtrado por corredor biológico
@@ -90,6 +109,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$mapa_registros_presencia_resumen <- renderLeaflet({
+        # areas_conservacion_filtradas <- filtrarAreasConservacion()
         registros_presencia_filtrados <- filtrarRegistrosPresencia()
         corredores_biologicos_filtrados <-
             filtrarCorredoresBiologicos()
@@ -109,7 +129,7 @@ shinyServer(function(input, output, session) {
                 group = "Áreas de conservación",
                 color = "brown",
                 stroke = TRUE,
-                weight = 2.0,
+                weight = 4.0,
                 fillOpacity = 0.0,
                 popup = paste0(
                     "<strong>Área de conservación: </strong>",
@@ -168,7 +188,10 @@ shinyServer(function(input, output, session) {
                     registros_presencia_filtrados$area_conservacion,
                     "<br>",
                     "<strong>Corredor biológico: </strong>",
-                    registros_presencia_filtrados$corredor_biologico
+                    registros_presencia_filtrados$corredor_biologico,
+                    "<br>",
+                    "<strong>Fuente de los datos: </strong>",
+                    registros_presencia_filtrados$fuente
                 )
             ) %>%
             addLayersControl(
@@ -199,10 +222,12 @@ shinyServer(function(input, output, session) {
             select(scientificName,
                    locality,
                    eventDate,
-                   corredor_biologico) %>%
+                   corredor_biologico,
+                   area_conservacion,
+                   fuente) %>%
             datatable(
                 rownames = FALSE,
-                colnames = c("Especie", "Localidad", "Fecha", "Corredor biológico"),
+                colnames = c("Especie", "Localidad", "Fecha", "CB", "AC", "Fuente"),
                 extensions = c("Buttons"),
                 options = list(
                     pageLength = 5,
@@ -221,6 +246,33 @@ shinyServer(function(input, output, session) {
                     )
                 )
             )
+    })
+    
+    output$grafico_corredores_biologicos_especies_resumen <- renderPlotly({
+        corredores_biologicos_filtrados <- filtrarCorredoresBiologicos()
+        
+        corredores_biologicos_filtrados %>%
+            st_drop_geometry() %>%
+            filter(cantidad_especies >= 1) %>%
+            top_n(n = 20, wt = cantidad_especies) %>%
+            mutate(nombre_cb = factor(nombre_cb, levels = unique(nombre_cb)[order(cantidad_especies, decreasing = TRUE)])) %>%
+            arrange(desc(cantidad_especies)) %>%
+            plot_ly(
+                x = ~ nombre_cb,
+                y = ~ cantidad_especies,
+                type = "bar",
+                name = "Proyectos",
+                text = ~ cantidad_especies,
+                textposition = 'auto',
+                marker = list(color = "#2c7fb8")
+            ) %>%
+            layout(
+                yaxis = list(title = "Cantidad de especies"),
+                xaxis = list(title = "Corredor biológico"),
+                barmode = 'group',
+                hovermode = "compare"
+            ) %>%
+            config(locale = 'es')        
     })
     
 })

@@ -10,6 +10,7 @@
 library(dplyr)
 library(tidyr)
 library(lubridate)
+library(stringr)
 library(sf)
 library(DT)
 library(plotly)
@@ -24,22 +25,24 @@ library(shinydashboard)
 # Lectura de conjuntos de datos
 #
 
-# Especies indicadoras
-especies_indicadoras <-
-  read.csv(
-    "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/indicadores/especies-indicadoras.csv"
-  )
-
 # Lectura de la capa de áreas de conservación
 areas_conservacion <-
   st_read(
     "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/geo/sinac/areas-conservacion-simplificadas_100m.geojson",
     quiet = TRUE
-  )
+  ) %>%
+  filter(siglas_ac == "ACLAP") # ¡¡OJO: este es un filtro alambrado que hay que eliminar cuando se habilite el cambio de AC!!
 # Transformación del CRS
 areas_conservacion <- 
   areas_conservacion %>%
   st_transform(4326)
+
+# Especies indicadoras
+especies_indicadoras <-
+  read.csv(
+    "https://raw.githubusercontent.com/biomonitoreo-participativo/datos/master/indicadores/especies-indicadoras.csv"
+  ) %>%
+  filter(str_detect(grupos_indicadoras, "ACLAP"))
 
 # Lectura de la capa de corredores_biologicos
 corredores_biologicos <-
@@ -67,13 +70,16 @@ st_crs(registros_presencia_app) = 4326
 registros_presencia_app <-
   registros_presencia_app %>%
   subset(scientificName %in% especies_indicadoras$especie)
-# Otras operaciones de curación de datos
+# Conversión de la columna de fecha
 registros_presencia_app <-
   registros_presencia_app %>%
   mutate(eventDate = as.Date(as.POSIXct(as.double(eventDate) / 1000, origin =
                                           "1970-01-01"),
                              format = "%Y-%m-%d %H:%M:%OS"))
-
+# Adición de columna de fuente de datos
+registros_presencia_app <-
+  registros_presencia_app %>%
+  mutate(fuente = "App de biomonitoreo")
 
 #
 # Integración de los registros de presencia de especies
@@ -98,7 +104,7 @@ registros_presencia <-
 # Adición de columna de área de conservación
 registros_presencia <-
   registros_presencia %>%
-  st_join(select(areas_conservacion, area_conservacion = nombre_ac))
+  st_join(select(areas_conservacion, area_conservacion = siglas_ac))
 
 # Adición de columna de corredor biológico
 registros_presencia <-
@@ -130,6 +136,13 @@ corredores_biologicos <-
 # Listas de selección
 #
 
+# Áreas de conservación
+opciones_areas_conservacion <-
+  unique(registros_presencia$area_conservacion)
+opciones_areas_conservacion <-
+  sort(opciones_areas_conservacion)
+# ¡¡OJO: falta agregar la opción de "Todas" cuando se habilite el cambio de AC!!
+
 # Grupos nomenclaturales
 opciones_grupos_nomenclaturales <-
   unique(especies_indicadoras$grupos_nomenclaturales)
@@ -144,14 +157,6 @@ opciones_especies_indicadoras <-
 opciones_especies_indicadoras <- sort(opciones_especies_indicadoras)
 opciones_especies_indicadoras <-
   c("Todas", opciones_especies_indicadoras)
-
-# Áreas de conservación
-opciones_areas_conservacion <-
-  unique(registros_presencia$area_conservacion)
-opciones_areas_conservacion <-
-  sort(opciones_areas_conservacion)
-opciones_areas_conservacion <-
-  c("Todas", opciones_areas_conservacion)
 
 # Corredores biológicos
 opciones_corredores_biologicos <-

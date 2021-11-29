@@ -106,7 +106,29 @@ registros_presencia <-
   st_join(select(corredores_biologicos, corredor_biologico = nombre_cb))
 
 
+#
+# Capas para mapas de coropletas
+#
+
+# Cantidad de especies en corredores biológicos
+corredores_biologicos_especies <-
+  corredores_biologicos %>%
+  st_join(registros_presencia) %>%
+  group_by(corredor_biologico) %>%
+  summarize(cantidad_especies = n_distinct(scientificName, na.rm = TRUE)) %>%
+  drop_na(corredor_biologico)
+# Agregar columna con cantidad de especies a la capa de corredores biológicos
+corredores_biologicos <-
+  corredores_biologicos %>%
+  inner_join(
+    select(corredores_biologicos_especies, corredor_biologico, cantidad_especies),
+    by = c("nombre_cb" = "corredor_biologico")
+  )
+
+
+#
 # Listas de selección
+#
 
 # Grupos nomenclaturales
 opciones_grupos_nomenclaturales <-

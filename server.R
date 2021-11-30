@@ -511,6 +511,31 @@ shinyServer(function(input, output, session) {
                         type="bar", color = "green") %>%
                 layout(xaxis = list(title = "Mes"),
                        yaxis = list(title = "Cantidad de especies"))
-        })          
+        })     
+    
+    output$graficos_camaras_trampa_horas <- renderPlot({
+      registros_presencia_filtrados <- filtrarRegistrosPresencia()
+      
+      registros_presencia_filtrados %>%
+        ggplot(aes(x = hora)) +
+        geom_histogram(binwidth = 1,
+                       color = "black",
+                       fill = "white") +
+        geom_density(
+          aes(y = ..count..),
+          color = "black",
+          fill = "gray",
+          alpha = 0.4                    
+        ) +
+        ggtitle(if_else(
+          input$selector_especies_indicadoras == "Todas",
+          "Todas las especies",
+          input$selector_especies_indicadoras
+        )) +
+        xlab("Hora") +
+        ylab("Registros de cámaras") +
+        facet_wrap( ~ scientificName, ncol = 2) +
+        theme_economist()
+    })    
       
 })

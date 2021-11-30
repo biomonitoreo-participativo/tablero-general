@@ -13,6 +13,8 @@ library(lubridate)
 library(stringr)
 library(sf)
 library(DT)
+library(ggplot2)
+library(ggthemes)
 library(plotly)
 library(leaflet)
 library(leaflet.extras)
@@ -77,6 +79,10 @@ registros_presencia_app <-
   mutate(eventDate = as.Date(as.POSIXct(as.double(eventDate) / 1000, origin =
                                           "1970-01-01"),
                              format = "%Y-%m-%d %H:%M:%OS"))
+# Creación de la columna de hora
+registros_presencia_app <-
+  registros_presencia_app %>%
+  mutate(hora = NA)
 # Adición de columna de fuente de datos
 registros_presencia_app <-
   registros_presencia_app %>%
@@ -183,7 +189,7 @@ registros_presencia_camaras <-
 # Creación de la columna de hora
 registros_presencia_camaras <-
   registros_presencia_camaras %>%
-  mutate(hourCaptured = hour(dateTimeCaptured))
+  mutate(hora = hour(dateTimeCaptured))
 # Adición de columna de fuente de datos
 registros_presencia_camaras <-
   registros_presencia_camaras %>%
@@ -205,6 +211,7 @@ registros_presencia <-
       scientificName,
       locality,
       eventDate,
+      hora,
       fuente,
       decimalLongitude,
       decimalLatitude,
@@ -215,6 +222,7 @@ registros_presencia <-
       scientificName = species,
       locality = deploymentLocationID,
       eventDate = dateTimeCaptured,
+      hora,
       fuente,
       decimalLongitude = longitude,
       decimalLatitude = latitude,

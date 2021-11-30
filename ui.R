@@ -33,10 +33,40 @@ dashboardPage(
             menuSubItem(text = "Resumen", tabName = "tab_resumen"),
             menuSubItem(text = "Mapa registros presencia", tabName = "tab_mapa_registros_presencia"),
             menuSubItem(text = "Tabla registros presencia", tabName = "tab_tabla_registros_presencia"),
-            menuSubItem(text = "Gráficos registros presencia", tabName = "tab_graficos_registros_presencia")
+            menuSubItem(text = "Gráficos registros presencia", tabName = "tab_graficos_registros_presencia"),
+            menuSubItem(text = "Gráficos cámaras trampa", tabName = "tab_graficos_camaras_trampa_horas")
         )
     )),
-    dashboardBody(tabItems(
+    dashboardBody(
+        tags$head(
+            tags$script(
+                '
+              // Este bloque de código JavaScript permite ampliar el largo de un box de shinydashboard.
+              // Está basado en:
+              // https://stackoverflow.com/questions/56965843/height-of-the-box-in-r-shiny
+              // Define function to set height of "map" and "map_container"
+              setHeight = function() {
+                var window_height = $(window).height();
+                var header_height = $(".main-header").height();
+                var boxHeight = window_height - header_height - 30;
+                $("#box_graficos_camaras_trampa_horas").height(boxHeight - 20);
+                $("#box_graficos_camaras_trampa_horas").height(boxHeight - 20);
+                // $("#box_graficos_camaras_trampa_horas").height(boxHeight - 20);
+                $("#box_graficos_camaras_trampa_horas").height(boxHeight - 40);
+                $("#box_graficos_camaras_trampa_horas").height(boxHeight - 40);
+              };
+              // Set input$box_height when the connection is established
+              $(document).on("shiny:connected", function(event) {
+                setHeight();
+              });
+              // Refresh the box height on every window resize event
+              $(window).on("resize", function(){
+                setHeight();
+              });
+            '
+            )
+        ),        
+        tabItems(
         tabItem(tabName = "tab_resumen",
                 fluidRow(
                     column(
@@ -63,28 +93,24 @@ dashboardPage(
                         width = NULL
                     )
                 ))),
-        tabItem(
-            tabName = "tab_mapa_registros_presencia",
-            fluidRow(column(
-                width = 12,
-                box(
-                    title = "Registros de presencia de especies indicadoras",
-                    leafletOutput(outputId = "mapa_registros_presencia", height = 700),
-                    width = NULL
-                )
-            ))
-        ),
-        tabItem(
-            tabName = "tab_tabla_registros_presencia",
-            fluidRow(column(
-                width = 12,
-                box(
-                    title = "Registros de presencia de especies indicadoras",
-                    DTOutput(outputId = "tabla_registros_presencia"),
-                    width = NULL
-                )
-            ))
-        ),
+        tabItem(tabName = "tab_mapa_registros_presencia",
+                fluidRow(column(
+                    width = 12,
+                    box(
+                        title = "Registros de presencia de especies indicadoras",
+                        leafletOutput(outputId = "mapa_registros_presencia", height = 700),
+                        width = NULL
+                    )
+                ))),
+        tabItem(tabName = "tab_tabla_registros_presencia",
+                fluidRow(column(
+                    width = 12,
+                    box(
+                        title = "Registros de presencia de especies indicadoras",
+                        DTOutput(outputId = "tabla_registros_presencia"),
+                        width = NULL
+                    )
+                ))),
         tabItem(
             tabName = "tab_graficos_registros_presencia",
             fluidRow(column(
@@ -111,6 +137,15 @@ dashboardPage(
                     width = NULL
                 )
             ))
-        )
+        ),
+        tabItem(tabName = "tab_graficos_camaras_trampa_horas",
+                fluidRow(
+                    box(
+                        id = "box_graficos_camaras_trampa_horas",
+                        title = "Distribución de los registros de cámaras en las horas del día",
+                        plotOutput(outputId = "graficos_camaras_trampa_horas"),
+                        width = 12
+                    )
+                ))
     ))
 )

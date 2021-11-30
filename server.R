@@ -45,6 +45,22 @@ shinyServer(function(input, output, session) {
                     selected = "Todas"
                 )
             }
+        } else {
+            # Lista ordenada de especies del grupo
+            especies_grupo <- registros_presencia
+            lista_especies_grupo <-
+                unique(especies_grupo$scientificName)
+            lista_especies_grupo <- sort(lista_especies_grupo)
+            lista_especies_grupo <-
+                c("Todas", lista_especies_grupo)
+            
+            updateSelectInput(
+                session,
+                "selector_especies_indicadoras",
+                label = "Especies indicadoras",
+                choices = lista_especies_grupo,
+                selected = "Todas"
+            )            
         }
         
         # Filtrado por especie
@@ -76,7 +92,7 @@ shinyServer(function(input, output, session) {
         if (input$selector_fuentes_datos != "Todas") {
             registros_presencia_filtrados <-
                 registros_presencia_filtrados %>%
-                filter(fuente_datos == input$selector_fuentes_datos)
+                filter(fuente == input$selector_fuentes_datos)
         }        
         
         return(registros_presencia_filtrados)

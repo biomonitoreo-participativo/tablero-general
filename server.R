@@ -527,11 +527,6 @@ shinyServer(function(input, output, session) {
           fill = "gray",
           alpha = 0.4                    
         ) +
-        ggtitle(if_else(
-          input$selector_especies_indicadoras == "Todas",
-          "Todas las especies",
-          input$selector_especies_indicadoras
-        )) +
         xlab("Hora") +
         ylab("Registros de cámaras") +
         facet_wrap( ~ scientificName, ncol = 2) +

@@ -5,9 +5,9 @@ account: biomonitoreo-participativo
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 5211433
-bundleId: 5310759
+bundleId: 5310895
 url: https://biomonitoreo-participativo.shinyapps.io/tablero-general/
-when: 1638296692.02465
-lastSyncTime: 1638296692.02468
+when: 1638298839.53893
+lastSyncTime: 1638298839.53897
 asMultiple: FALSE
 asStatic: FALSE

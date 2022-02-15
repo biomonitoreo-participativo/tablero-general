@@ -95,6 +95,10 @@ detecciones <-
   read.csv(
     "https://raw.githubusercontent.com/biomonitoreo-participativo/biomonitoreo-participativo-datos/master/crtms/detection.csv"
   )
+# Corrección del nombre científico
+detecciones <-
+  detecciones %>%
+  mutate(species = str_replace(species, "_", " "))
 # Conversión de la columna de fecha
 detecciones <-
   detecciones %>%
